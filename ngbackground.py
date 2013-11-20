@@ -1,5 +1,4 @@
 import subprocess
-import feedparser
 import re
 import urllib
 import os
@@ -29,32 +28,12 @@ def get_large_image_url_from_feed_image_url(url, width, height):
                   str(width) + "x" + str(height) + "\\2", url)
 
 
-def get_image_from_feed(feed):
-    url = re.sub(".*src=\"(http:[^\"]+_[0-9]+x[0-9]+\.jpg)\".*",
-                 "\\1", str(feed["items"][0]))
-    return get_large_image_url_from_feed_image_url(url, WIDTH, HEIGHT)
-
-
 def set_desktop_background_via_apple_script(filename):
     subprocess.Popen(SCRIPT % filename, shell=True)
 
 
-def set_desktop_background(filename):
-    from appscript import app, mactypes
-    app("Finder").desktop_picture.set(mactypes.File(filename))
-
-
 def save_url(url, target):
     urllib.urlretrieve(url, target)
-    #f = open(target, "w");
-    #f.write(urllib.urlopen(imageurl).read())
-    #f.close()
-
-
-def download_last_image_from_feed(url, imageurl_from_feed_getter, target):
-    feed = feedparser.parse(url)
-    imageurl = imageurl_from_feed_getter(feed)
-    save_url(imageurl, target)
 
 
 def download_last_image_from_source(url, image_getter, target):
@@ -92,10 +71,8 @@ def setng_background_image():
         seconds_past = time.time() - os.path.getctime(target)
     if seconds_past > MINIMUM_SECONDS_BETWEEN_DOWNLOADS:
         #download_last_image_from_feed(FEED_LOCATION,
-        #                              get_image_from_feed, target)
         download_last_image_from_source(FEED_LOCATION,
                                         get_first_image_from_text, target)
-        #set_desktop_background(target)
         set_desktop_background_via_apple_script(target)
 
 
