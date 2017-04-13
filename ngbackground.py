@@ -72,7 +72,7 @@ def get_first_image_from_json(loadedJson):
     for item in loaded.get('data', {}).get('children', []):
         print item.get('data').get('url')
         found = re.match(
-            '(https?://xi\.redd\.it/[a-z0-9]+\.jpg|\
+            '(https?://i\.redd\.it/[a-z0-9]+\.jpg|\
 https?://(i\.)?imgur\.com/[a-z0-9]+(\.jpg)?)',
             item.get('data', {}).get('url', ''), re.IGNORECASE)
         if found:
