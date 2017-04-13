@@ -4,6 +4,7 @@ import urllib
 import os
 import time
 import urllib2
+import json
 
 WIDTH = 1920
 HEIGHT = 1200
@@ -12,6 +13,8 @@ FEED_LOCATION = "http://feeds.nationalgeographic.com/\
 ng/photography/photo-of-the-day/"
 IMAGE_FORMAT = r"(.*)_[0-9]+x[0-9]+(\.jpg)"
 MINIMUM_SECONDS_BETWEEN_DOWNLOADS = 60 * 60 * 6
+
+REDDIT_FEED_LOCATION = "https://www.reddit.com/r/GetMotivated.json"
 
 SCRIPT = """/usr/bin/osascript<<END
 tell application "Finder"
@@ -64,15 +67,29 @@ def get_first_image_from_text(text):
     return None
 
 
+def get_first_image_from_json(loadedJson):
+    loaded = json.loads(loadedJson)
+    for item in loaded.get('data', {}).get('children', []):
+        print item.get('data').get('url')
+        found = re.match(
+            '(https?://xi\.redd\.it/[a-z0-9]+\.jpg|\
+https?://(i\.)?imgur\.com/[a-z0-9]+(\.jpg)?)',
+            item.get('data', {}).get('url', ''), re.IGNORECASE)
+        if found:
+            return item.get('data').get('url')
+    return None
+
+
 def setng_background_image():
     target = "/tmp/bkg.jpg"
     seconds_past = MINIMUM_SECONDS_BETWEEN_DOWNLOADS + 1
     if os.path.isfile(target):
         seconds_past = time.time() - os.path.getctime(target)
-    if seconds_past > MINIMUM_SECONDS_BETWEEN_DOWNLOADS:
-        #download_last_image_from_feed(FEED_LOCATION,
-        download_last_image_from_source(FEED_LOCATION,
-                                        get_first_image_from_text, target)
+    if True or seconds_past > MINIMUM_SECONDS_BETWEEN_DOWNLOADS:
+        #download_last_image_from_source(FEED_LOCATION,
+        #                                get_first_image_from_text, target)
+        download_last_image_from_source(REDDIT_FEED_LOCATION,
+                                        get_first_image_from_json, target)
         set_desktop_background_via_apple_script(target)
 
 
